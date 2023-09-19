@@ -1,16 +1,30 @@
-import React from "react";
-import { Alert, Image, Pressable, StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import avatar from "../assets/avatar.png";
+import * as ImagePicker from "expo-image-picker";
+import { uploadAvatar } from "../servises/storage";
 
-const ImageInput = ({ src, style }) => {
+pickImage = async (setState) => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    allowsEditing: true,
+    aspect: [4, 3],
+    base64: true,
+    quality: 0.75,
+  });
+
+  if (!result.canceled) {
+    const { uri } = result.assets[0];
+    setState(uri);
+  }
+};
+
+const ImageInput = ({ src, onChange, style }) => {
+  const image = src ? { uri: src } : null;
   return (
     <View style={[styles.wrapper, style]}>
-      <Image source={src || avatar} style={styles.image} />
-      <Pressable
-        style={styles.imgBtn}
-        onPress={() => Alert.alert("Image button pressed")}
-      >
+      <Image source={image || avatar} style={styles.image} />
+      <Pressable style={styles.imgBtn} onPress={() => pickImage(onChange)}>
         <SvgComponent isClose={Boolean(src)} />
       </Pressable>
     </View>

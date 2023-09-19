@@ -1,14 +1,14 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const PostsScreen = () => {
+const ProfileScreen = () => {
   return (
     <View
       style={{ alignItems: "center", justifyContent: "center", height: "100%" }}
     >
-      <Text>Posts Screen</Text>
+      <Text>Profile</Text>
     </View>
   );
 };
 
-export default PostsScreen;
+export default ProfileScreen;

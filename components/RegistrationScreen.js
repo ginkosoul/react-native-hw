@@ -8,48 +8,94 @@ import {
   StatusBar,
   Platform,
   Pressable,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import OrangeBtn from "./OrangeBtn";
 import PasswordInput from "./PasswordInput";
 import ImageInput from "./ImageInput";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { registerThunk } from "../redux/user/operations";
 
 const data = {
   title: "Реєстрація",
   registerBtn: "Зареєстуватися",
   inputs: [
-    { placeholder: "Логін", inputMode: "text" },
-    { placeholder: "Адреса електронної пошти", inputMode: "email" },
-    { placeholder: "Пароль", inputMode: "text", secureTextEntry: true },
+    { placeholder: "Логін", inputMode: "text", label: "displayName" },
+    {
+      placeholder: "Адреса електронної пошти",
+      inputMode: "email",
+      label: "email",
+    },
+    {
+      placeholder: "Пароль",
+      inputMode: "text",
+      label: "password",
+      secureTextEntry: true,
+    },
   ],
   subText: { title: "Вже є акаунт? ", btn: "Увійти" },
 };
 
 const RegistrationScreen = () => {
+  console.log("rendered");
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const [formData, setFormData] = useState({
+    displayName: "",
+    email: "",
+    password: "",
+    imageURI: "",
+  });
+  const onChange = (value, label) => {
+    setFormData((prev) => ({ ...prev, [label]: value }));
+  };
+  const onSubmit = (data) => {
+    dispatch(registerThunk(data));
+  };
   return (
-    <SafeAreaView style={styles.wrapper}>
-      <View style={styles.view}>
-        <ImageInput style={styles.image} />
-        <Text style={styles.title}>{data.title}</Text>
-        {data.inputs.map((e) =>
-          e.secureTextEntry ? (
-            <PasswordInput {...e} style={styles.input} key={e.placeholder} />
-          ) : (
-            <TextInput key={e.placeholder} style={styles.input} {...e} />
-          )
-        )}
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <SafeAreaView style={styles.wrapper}>
+        <View style={styles.view}>
+          <ImageInput
+            onChange={(value) => onChange(value, "imageURI")}
+            src={formData.imageURI}
+          />
+          <Text style={styles.title}>{data.title}</Text>
+          {data.inputs.map((e) =>
+            e.secureTextEntry ? (
+              <PasswordInput
+                {...e}
+                onChangeText={(value) => onChange(value, e.label)}
+                value={formData[e.label]}
+                style={styles.input}
+                key={e.placeholder}
+              />
+            ) : (
+              <TextInput
+                key={e.placeholder}
+                onChangeText={(value) => onChange(value, e.label)}
+                value={formData[e.label]}
+                style={styles.input}
+                {...e}
+              />
+            )
+          )}
 
-        <OrangeBtn
-          title={data.registerBtn}
-          // onPress={() => Alert.alert("Right button pressed")}
-        />
-        <View style={styles.subTextWrapper}>
-          <Text style={styles.subText}>{data.subText.title}</Text>
-          <Pressable>
-            <Text style={styles.subText}>{data.subText.btn}</Text>
-          </Pressable>
+          <OrangeBtn
+            title={data.registerBtn}
+            onPress={() => onSubmit(formData)}
+          />
+          <View style={styles.subTextWrapper}>
+            <Text style={styles.subText}>{data.subText.title}</Text>
+            <Pressable onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.subText}>{data.subText.btn}</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -69,7 +115,7 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "500",
     letterSpacing: 0.3,
-    marginBottom: 32,
+    paddingVertical: 32,
   },
   view: {
     position: "relative",
@@ -81,9 +127,6 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 25,
     alignItems: "center",
     paddingBottom: 45,
-  },
-  image: {
-    marginBottom: 32,
   },
   input: {
     backgroundColor: "#F6F6F6",

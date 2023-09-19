@@ -1,0 +1,73 @@
+[
+  {
+    "_tokenResponse": {
+      "email": "test@mail.com",
+      "expiresIn": "3600",
+      "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImFhMDhlN2M3ODNkYjhjOGFjNGNhNzJhZjdmOWRkN2JiMzk4ZjE2ZGMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZ29pdC1tb2JpbGUtYXBwIiwiYXVkIjoiZ29pdC1tb2JpbGUtYXBwIiwiYXV0aF90aW1lIjoxNjk0ODg4Mjg1LCJ1c2VyX2lkIjoiSFJ2VG05Tk9GR1BOMHN2djZVN1Jwa1J0OXZ2MiIsInN1YiI6IkhSdlRtOU5PRkdQTjBzdnY2VTdScGtSdDl2djIiLCJpYXQiOjE2OTQ4ODgyODUsImV4cCI6MTY5NDg5MTg4NSwiZW1haWwiOiJ0ZXN0QG1haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlc3RAbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.Mi0YlhYnA738ebsD7MaHkMgHE1Lf9uh6XYUpKXTESFXW414WpxkWPBCiei81-aE9IJK4kxGyTbW1OMeY8NfuTc7FZh3MNx9FRO3CwNMMFCVvPK5ovybExsc8gXS1o-0U2MXhYMxtBcKs_Jl46IUgdwq6bkS69kC4bEw3xAXtmyxmCF2zpahjB3IPivJMHlEgAXvHHKCbSkOy7LeMKZJcegFcHYGWfIRqM3v4JIvvpr6ijp-Bur4Bcfbv5Br6SgIMfR1hJUXZXXMTvep0wau09eHv6JR1pJ-3u-VU5N9bqdeGYJ__f69P2Xh0mCKBqM4ieDVq7W0f-MZBEsPJ4lOi7A",
+      "kind": "identitytoolkit#SignupNewUserResponse",
+      "localId": "HRvTm9NOFGPN0svv6U7RpkRt9vv2",
+      "refreshToken": "AMf-vBwESM2j2TdTa6D8i3KTuW3BrIZs-FmURUrGR2oHEd9u7sRWVYgZqTH-sa0-3P5kdbsIO8pEijg4tq0xzqnofBLgs90pZO-EKMWxTqRBAHm-2TQZcQSW0uytVK6BaDCIWriHeAJtplWkwfRmUL4oZ1Rt0C8H0rYrI6bn8gIcdWiKTEM_G0lykTEz5_xhuE_NBTophrkDKdpoZmJjDbWq_0Dd9Knrnw"
+    },
+    "operationType": "signIn",
+    "providerId": null,
+    "user": {
+      "_redirectEventId": "undefined",
+      "apiKey": "AIzaSyDHoITb0xPViX5bE-r1i-jqiqf6jA7wv6c",
+      "appName": "[DEFAULT]",
+      "createdAt": "1694888285261",
+      "displayName": "undefined",
+      "email": "test@mail.com",
+      "emailVerified": false,
+      "isAnonymous": false,
+      "lastLoginAt": "1694888285261",
+      "phoneNumber": "undefined",
+      "photoURL": "undefined",
+      "providerData": ["Array"],
+      "stsTokenManager": ["Object"],
+      "tenantId": "undefined",
+      "uid": "HRvTm9NOFGPN0svv6U7RpkRt9vv2"
+    }
+  },
+
+  {
+    "metadata": {
+      "bucket": "goit-mobile-app.appspot.com",
+      "cacheControl": "undefined",
+      "contentDisposition": "inline; filename*=utf-8''avatar.jpeg",
+      "contentEncoding": "identity",
+      "contentLanguage": "undefined",
+      "contentType": "application/octet-stream",
+      "customMetadata": "undefined",
+      "fullPath": "avatars/avatar.jpeg",
+      "generation": "1695119881634758",
+      "md5Hash": "1B2M2Y8AsgTpgAmY7PhCfg==",
+      "metageneration": "1",
+      "name": "avatar.jpeg",
+      "size": 0,
+      "timeCreated": "2023-09-19T10:38:01.636Z",
+      "type": "file",
+      "updated": "2023-09-19T10:38:01.636Z"
+    },
+    "ref": {
+      "_location": {
+        "bucket": "goit-mobile-app.appspot.com",
+        "path_": "avatars/avatar.jpeg"
+      },
+      "_service": {
+        "_appCheckProvider": ["Provider"],
+        "_appId": null,
+        "_authProvider": ["Provider"],
+        "_bucket": ["Location"],
+        "_deleted": false,
+        "_firebaseVersion": "10.4.0",
+        "_host": "firebasestorage.googleapis.com",
+        "_maxOperationRetryTime": 120000,
+        "_maxUploadRetryTime": 600000,
+        "_protocol": "https",
+        "_requests": ["Set"],
+        "_url": "undefined",
+        "app": ["FirebaseAppImpl"]
+      }
+    }
+  }
+]
