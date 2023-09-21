@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import avatar from "../assets/avatar.png";
 import * as ImagePicker from "expo-image-picker";
-import { uploadAvatar } from "../servises/storage";
 
 pickImage = async (setState) => {
   let result = await ImagePicker.launchImageLibraryAsync({
