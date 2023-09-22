@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import ProfileScreen from "./ProfileScreen";
@@ -115,7 +115,7 @@ const Home = () => {
       <Tabs.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ title: "Профіль", headerRight: () => <LogoutBtn /> }}
+        options={{ title: "Профіль", headerShown: false }}
       />
     </Tabs.Navigator>
   );

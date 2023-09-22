@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -8,68 +8,105 @@ import {
   TextInput,
   View,
   Dimensions,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Circle, Path, Svg } from "react-native-svg";
 import { useSelector } from "react-redux";
 import { selectUser } from "../redux/user/selectors";
+import { createComment, getComments } from "../servises/firestore";
 
-const comments = [
-  {
-    photoURL:
-      "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-    message:
-      "Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!",
-    createdAt: "09 червня, 2020 | 08:40",
-    userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
-  },
-  {
-    photoURL:
-      "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-    message:
-      "A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.",
-    createdAt: "09 червня, 2020 | 09:14",
-    userId: "HRvTm9NOFGPN0svv6U7RpkRt9vv2",
-  },
-  {
-    photoURL:
-      "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-    message: "Thank you! That was very helpful!",
-    createdAt: "09 червня, 2020 | 09:20",
-    userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
-  },
-];
+// const comments = [
+//   {
+//     photoURL:
+//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
+//     message:
+//       "Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!",
+//     createdAt: "09 червня, 2020 | 08:40",
+//     userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
+//   },
+//   {
+//     photoURL:
+//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
+//     message:
+//       "A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.",
+//     createdAt: "09 червня, 2020 | 09:14",
+//     userId: "HRvTm9NOFGPN0svv6U7RpkRt9vv2",
+//   },
+//   {
+//     photoURL:
+//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
+//     message: "Thank you! That was very helpful!",
+//     createdAt: "09 червня, 2020 | 09:20",
+//     userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
+//   },
+// ];
 
 const textData = {
   input: { placeholder: "Коментувати...", inputMode: "text" },
 };
 
 const CommentsScreen = ({ route, navigation }) => {
-  const [comment, setComment] = useState("");
-  const { uid: currentUserId } = useSelector(selectUser);
+  const [message, setMessage] = useState("");
+  const [comments, setComments] = useState([]);
 
-  console.log(route);
+  const { uid: currentUserId } = useSelector(selectUser);
   const { title, postId, imageURL } = route.params;
+  console.log(route);
+  console.log("comments", comments);
+
+  useEffect(() => {
+    getComments({ postId })
+      .then((r) => {
+        console.log(r);
+        setComments(r);
+      })
+      .catch((error) => {
+        console.log("Something went wrong getting comments");
+      });
+  }, []);
+
   const data = comments.map((comment) => ({ ...comment, currentUserId }));
+
+  const onSubmit = () => {
+    createComment({ message, postId, userId: currentUserId })
+      .then((id) =>
+        setComments((prev) => [
+          ...prev,
+          { message, postId, userId: currentUserId, id, createdAt: new Date() },
+        ])
+      )
+      .catch((error) => {
+        console.log("Something went wrong");
+      });
+  };
+
   return (
-    <View style={styles.container}>
-      <Image style={styles.image} source={{ uri: imageURL }} alt={title} />
-      <FlatList
-        data={data}
-        renderItem={({ item }) => <CommentCard {...item} />}
-        keyExtractor={(item) => item.createdAt}
-      />
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.input}
-          {...textData.input}
-          onChangeText={setComment}
-          value={comment}
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <Image style={styles.image} source={{ uri: imageURL }} alt={title} />
+        <FlatList
+          data={data}
+          renderItem={({ item }) => <CommentCard {...item} />}
+          keyExtractor={(item) => item.createdAt}
         />
-        <Pressable style={styles.sendBtn}>
-          <SvgSend />
-        </Pressable>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            {...textData.input}
+            onChangeText={setMessage}
+            value={message}
+          />
+          <Pressable
+            style={styles.sendBtn}
+            onPress={onSubmit}
+            disabled={!message}
+          >
+            <SvgSend />
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -124,7 +161,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontWeight: "500",
-    // lineHeight: 18,
     borderRadius: 50,
     borderColor: "#E8E8E8",
     backgroundColor: "#F6F6F6",
@@ -180,7 +216,7 @@ function CommentCard({
             isOwn ? { textAlign: "left" } : { textAlign: "right" },
           ]}
         >
-          {createdAt}
+          {createdAt.toISOString()}
         </Text>
       </View>
     </View>

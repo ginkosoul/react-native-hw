@@ -6,53 +6,12 @@ import avatar from "../assets/avatar.png";
 import PostCard from "../components/PostCard";
 import { getPosts } from "../servises/firestore";
 
-// const posts = [
-//   {
-//     imageURL: avatar,
-//     title: "avatar",
-//     likes: 2,
-//     comments: 0,
-//     likedByMe: true,
-//     description: "",
-//     author: "",
-//     location: "Ukraine",
-//     postId: "1",
-//   },
-//   {
-//     imageURL: avatar,
-//     title: "avatar",
-//     likes: 0,
-//     comments: 4,
-//     commentedByMe: true,
-//     description: "",
-//     author: "",
-//     location: "Ukraine",
-//     postId: "2",
-//   },
-//   {
-//     imageURL: avatar,
-//     title: "avatar",
-//     likes: 3,
-//     comments: 1,
-//     description: "",
-//     author: "",
-//     location: "Ukraine",
-//     postId: "3",
-//   },
-// ];
-
 const PostsScreen = () => {
   const [posts, setPosts] = useState([]);
-  const {
-    displayName = "User",
-    photoURL,
-    email,
-    uid,
-  } = useSelector(selectUser);
+  const { displayName = "User", photoURL, email } = useSelector(selectUser);
   useEffect(() => {
     getPosts()
       .then((data) => {
-        console.log(data);
         setPosts(data);
       })
       .catch((error) => console.log("Can`t get posts", error));

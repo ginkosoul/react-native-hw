@@ -12,14 +12,14 @@ const PostCard = ({
   comments,
   commentedByMe,
   likedByMe,
-  authorId,
   city,
   country,
   postId,
+  style,
 }) => {
   const navigation = useNavigation();
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, style]}>
       <Image style={styles.image} source={{ uri: imageURL }} alt={title} />
       <Text style={styles.title}>{title}</Text>
       <View style={styles.iconsWrapper}>

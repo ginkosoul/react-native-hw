@@ -9,6 +9,7 @@ import {
 import { db, auth } from "../config";
 
 const postsRef = collection(db, "posts");
+const commentsRef = collection(db, "comments");
 
 export const writeDataToFirestore = async () => {
   try {
@@ -51,6 +52,20 @@ export const createPost = async ({
   }
 };
 
+export const createComment = async ({ userId, postId, message }) => {
+  try {
+    const docRef = await addDoc(commentsRef, {
+      userId,
+      postId,
+      message,
+      createdAt: Timestamp.now(),
+    });
+    return docRef.id;
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
 export const getPosts = async (body) => {
   const userId = body?.userId;
   const posts = [];
@@ -60,4 +75,18 @@ export const getPosts = async (body) => {
     posts.push({ postId: doc.id, ...doc.data() });
   });
   return posts;
+};
+
+export const getComments = async ({ postId }) => {
+  const comments = [];
+  const q = query(commentsRef, where("postId", "==", postId));
+  const snapshot = await getDocs(q);
+  snapshot.forEach((doc) => {
+    comments.push({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt.toDate(),
+    });
+  });
+  return comments;
 };

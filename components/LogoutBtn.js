@@ -1,17 +1,12 @@
-import { useDispatch } from "react-redux";
-import { logoutThunk } from "../redux/user/operations";
 import { Pressable, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { logoutUser } from "../servises/auth";
 
 export default function LogoutBtn(props) {
-  const dispatch = useDispatch();
-  // dispatch(logoutThunk())
-
-  const { onPress = () => logoutUser(), title = "Logout" } = props;
+  const { onPress = () => logoutUser(), title = "Logout", style = {} } = props;
   return (
     <Pressable
-      style={styles.button}
+      style={[styles.button, style]}
       onPress={onPress}
       accessibilityLabel={title}
     >
@@ -25,5 +20,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 3,
+    marginRight: 16,
   },
 });
