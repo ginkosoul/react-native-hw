@@ -17,6 +17,7 @@ import ImageInput from "./ImageInput";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { registerThunk } from "../redux/user/operations";
+import { registerUser } from "../servises/auth";
 
 const data = {
   title: "Реєстрація",
@@ -39,7 +40,6 @@ const data = {
 };
 
 const RegistrationScreen = () => {
-  console.log("rendered");
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
@@ -52,7 +52,8 @@ const RegistrationScreen = () => {
     setFormData((prev) => ({ ...prev, [label]: value }));
   };
   const onSubmit = (data) => {
-    dispatch(registerThunk(data));
+    registerUser(data);
+    // dispatch(registerThunk(data));
   };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

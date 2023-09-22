@@ -1,7 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  initializeAuth,
+  getReactNativePersistence,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getDatabase } from "firebase/database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { store } from "./redux/store";
+import { updateAuth } from "./redux/user/slice";
+
 import {
   FIREBASE_API_KEY,
   FIREBASE_STORAGE_BUCKET,
@@ -24,6 +34,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+console.info("initialize Firebase app");
+
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+// export const auth = getAuth(app, {per});
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+auth.onAuthStateChanged((user) => {
+  const { email = "", displayName = "", photoURL = "", uid = "" } = user || {};
+  store.dispatch(updateAuth({ email, displayName, photoURL, uid }));
+});

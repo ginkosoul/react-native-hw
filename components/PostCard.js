@@ -2,6 +2,8 @@ import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { ROUTES } from "../constants/routes";
 
 const PostCard = ({
   imageURL,
@@ -11,15 +13,22 @@ const PostCard = ({
   commentedByMe,
   likedByMe,
   authorId,
-  location,
+  city,
+  country,
   postId,
 }) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.wrapper}>
-      <Image style={styles.image} source={imageURL} alt={title} />
+      <Image style={styles.image} source={{ uri: imageURL }} alt={title} />
       <Text style={styles.title}>{title}</Text>
       <View style={styles.iconsWrapper}>
-        <Pressable style={styles.iconBtn}>
+        <Pressable
+          style={styles.iconBtn}
+          onPress={() =>
+            navigation.navigate(ROUTES.comments, { title, postId, imageURL })
+          }
+        >
           <SvgComments count={comments} commentedByMe={commentedByMe} />
           <Text style={styles.iconText}>{comments}</Text>
         </Pressable>
@@ -29,7 +38,7 @@ const PostCard = ({
         </Pressable>
         <View style={styles.location}>
           <Feather name="map-pin" size={24} color="#BDBDBD" />
-          <Text style={styles.locationText}>{location}</Text>
+          <Text style={styles.locationText}>{`${city}, ${country}`}</Text>
         </View>
       </View>
     </View>

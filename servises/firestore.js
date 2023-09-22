@@ -1,5 +1,14 @@
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { db, auth } from "../config";
+
+const postsRef = collection(db, "posts");
 
 export const writeDataToFirestore = async () => {
   try {
@@ -25,7 +34,7 @@ export const createPost = async ({
   longitude,
 }) => {
   try {
-    const docRef = await addDoc(collection(db, "posts"), {
+    const docRef = await addDoc(postsRef, {
       userId,
       title,
       imageURL,
@@ -40,4 +49,15 @@ export const createPost = async ({
   } catch (e) {
     console.error("Error adding document: ", e);
   }
+};
+
+export const getPosts = async (body) => {
+  const userId = body?.userId;
+  const posts = [];
+  const q = userId ? query(postsRef, where("userId", "==", userId)) : postsRef;
+  const snapshot = await getDocs(q);
+  snapshot.forEach((doc) => {
+    posts.push({ postId: doc.id, ...doc.data() });
+  });
+  return posts;
 };

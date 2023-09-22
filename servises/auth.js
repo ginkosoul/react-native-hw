@@ -1,7 +1,6 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
   updateProfile,
   signOut,
 } from "firebase/auth";
@@ -14,28 +13,32 @@ export const registerUser = async ({
   displayName,
   imageURI,
 }) => {
-  await createUserWithEmailAndPassword(auth, email, password);
-  const photoURL = await uploadAvatar(imageURI);
-  await updateProfile(auth.currentUser, { displayName, photoURL });
-  const {
-    displayName: name,
-    photoURL: url,
-    email: userEmail,
-    uid,
-  } = auth.currentUser;
-  return { displayName: name, photoURL: url, email: userEmail, uid };
-};
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    const photoURL = await uploadAvatar(imageURI);
+    await updateProfile(auth.currentUser, { displayName, photoURL });
+  } catch (error) {
+    console.log("regiterUser error: ", error);
+  }
 
-export const authStateChanged = async (onChange = () => {}) => {
-  onAuthStateChanged((user) => {
-    onChange(user);
-  });
+  // const {
+  //   displayName: name,
+  //   photoURL: url,
+  //   email: userEmail,
+  //   uid,
+  // } = auth.currentUser;
+  // return { displayName: name, photoURL: url, email: userEmail, uid };
 };
 
 export const loginUser = async ({ email, password }) => {
-  const { user } = await signInWithEmailAndPassword(auth, email, password);
-  const { displayName, photoURL, email: userEmail, uid } = user;
-  return { displayName, photoURL, email: userEmail, uid };
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.log("loginUser error: ", error);
+  }
+  // const { user } = await signInWithEmailAndPassword(auth, email, password);
+  // const { displayName, photoURL, email: userEmail, uid } = user;
+  // return { displayName, photoURL, email: userEmail, uid };
 };
 
 export const updateUserProfile = async (update) => {

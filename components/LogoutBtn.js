@@ -2,10 +2,13 @@ import { useDispatch } from "react-redux";
 import { logoutThunk } from "../redux/user/operations";
 import { Pressable, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { logoutUser } from "../servises/auth";
 
 export default function LogoutBtn(props) {
   const dispatch = useDispatch();
-  const { onPress = () => dispatch(logoutThunk()), title = "Logout" } = props;
+  // dispatch(logoutThunk())
+
+  const { onPress = () => logoutUser(), title = "Logout" } = props;
   return (
     <Pressable
       style={styles.button}

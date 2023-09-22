@@ -9,12 +9,14 @@ import {
   StatusBar,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import OrangeBtn from "./OrangeBtn";
 import PasswordInput from "./PasswordInput";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { loginThunk } from "../redux/user/operations";
+import { loginUser } from "../servises/auth";
 
 const data = {
   title: "Увійти",
@@ -35,18 +37,30 @@ const data = {
   subText: { title: "Немає акаунту? ", btn: "Зареєструватися" },
 };
 
+const initialState = {
+  email: "",
+  password: "",
+};
+
 const LoginScreen = () => {
-  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState(initialState);
   const onChange = (value, label) => {
     setFormData((prev) => ({ ...prev, [label]: value }));
   };
   const onSubmit = (data) => {
-    dispatch(loginThunk(data));
+    setIsLoading(true);
+    loginUser(data)
+      .then(() => {
+        setFormData({ ...initialState });
+      })
+      .catch(() => {
+        Alert.alert("Something went wrong");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -74,8 +88,9 @@ const LoginScreen = () => {
           )}
 
           <OrangeBtn
-            title={data.registerBtn}
+            title={isLoading ? "Loading" : data.registerBtn}
             onPress={() => onSubmit(formData)}
+            disabled={isLoading}
           />
           <View style={styles.subTextWrapper}>
             <Text style={styles.subText}>{data.subText.title}</Text>

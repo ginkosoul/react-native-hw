@@ -1,47 +1,62 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, Image, StyleSheet, FlatList } from "react-native";
 import { useSelector } from "react-redux";
 import { selectUser } from "../redux/user/selectors";
 import avatar from "../assets/avatar.png";
 import PostCard from "../components/PostCard";
+import { getPosts } from "../servises/firestore";
 
-const posts = [
-  {
-    imageURL: avatar,
-    title: "avatar",
-    likes: 2,
-    comments: 0,
-    likedByMe: true,
-    description: "",
-    author: "",
-    location: "Ukraine",
-    postId: "1",
-  },
-  {
-    imageURL: avatar,
-    title: "avatar",
-    likes: 0,
-    comments: 4,
-    commentedByMe: true,
-    description: "",
-    author: "",
-    location: "Ukraine",
-    postId: "2",
-  },
-  {
-    imageURL: avatar,
-    title: "avatar",
-    likes: 3,
-    comments: 1,
-    description: "",
-    author: "",
-    location: "Ukraine",
-    postId: "3",
-  },
-];
+// const posts = [
+//   {
+//     imageURL: avatar,
+//     title: "avatar",
+//     likes: 2,
+//     comments: 0,
+//     likedByMe: true,
+//     description: "",
+//     author: "",
+//     location: "Ukraine",
+//     postId: "1",
+//   },
+//   {
+//     imageURL: avatar,
+//     title: "avatar",
+//     likes: 0,
+//     comments: 4,
+//     commentedByMe: true,
+//     description: "",
+//     author: "",
+//     location: "Ukraine",
+//     postId: "2",
+//   },
+//   {
+//     imageURL: avatar,
+//     title: "avatar",
+//     likes: 3,
+//     comments: 1,
+//     description: "",
+//     author: "",
+//     location: "Ukraine",
+//     postId: "3",
+//   },
+// ];
 
 const PostsScreen = () => {
-  const { displayName, photoURL, email, uid } = useSelector(selectUser);
+  const [posts, setPosts] = useState([]);
+  const {
+    displayName = "User",
+    photoURL,
+    email,
+    uid,
+  } = useSelector(selectUser);
+  useEffect(() => {
+    getPosts()
+      .then((data) => {
+        console.log(data);
+        setPosts(data);
+      })
+      .catch((error) => console.log("Can`t get posts", error));
+  }, []);
   return (
     <FlatList
       data={posts}
@@ -51,7 +66,7 @@ const PostsScreen = () => {
       ListHeaderComponent={
         <View style={styles.userWrapper}>
           <Image
-            source={{ uri: photoURL }}
+            source={photoURL ? { uri: photoURL } : avatar}
             width={60}
             height={60}
             style={styles.userImage}
