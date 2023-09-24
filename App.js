@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Provider, useSelector } from "react-redux";
-import { selectIsAuth } from "./redux/user/selectors";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { selectIsAuth, selectUser } from "./redux/user/selectors";
 import { store } from "./redux/store";
 
 import { ROUTES } from "./constants/routes";
@@ -11,6 +11,9 @@ import LoginScreen from "./components/LoginScreen";
 import RegistrationScreen from "./components/RegistrationScreen";
 import CommentsScreen from "./screens/CommentsScreen";
 import Home from "./screens/Home";
+import { getPosts, getUsers } from "./servises/firestore";
+import { setCurrentUserPosts, setPosts, setUsers } from "./redux/posts/slice";
+import MapScreen from "./screens/MapScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +40,15 @@ const routes = {
       headerTitleAlign: "center",
     },
   },
+  map: {
+    name: ROUTES.map,
+    component: MapScreen,
+    options: {
+      headerShown: true,
+      title: "Карта",
+      headerTitleAlign: "center",
+    },
+  },
   login: {
     name: ROUTES.login,
     component: LoginScreen,
@@ -53,16 +65,39 @@ const routes = {
 };
 
 function AppNavigation() {
-  const isAuth = useSelector(selectIsAuth);
-  const initialRoute = isAuth ? routes.home.name : routes.login.name;
+  const { uid } = useSelector(selectUser) || {};
 
+  const initialRoute = uid ? routes.home.name : routes.login.name;
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (uid) {
+      getPosts()
+        .then((data) => {
+          dispatch(setPosts(data));
+        })
+        .catch((error) => console.log("Can`t get posts", error));
+      getPosts({ userId: uid })
+        .then((data) => {
+          dispatch(setCurrentUserPosts(data));
+        })
+        .catch((error) => console.log("Can`t get posts", error));
+      getUsers()
+        .then((users) => {
+          dispatch(setUsers(users));
+        })
+        .catch((error) => {
+          console.log("Something went wrong getting users", error);
+        });
+    }
+  }, [uid]);
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={initialRoute}>
-        {isAuth ? (
+        {uid ? (
           <>
             <Stack.Screen {...routes.home} />
             <Stack.Screen {...routes.comments} />
+            <Stack.Screen {...routes.map} />
           </>
         ) : (
           <>

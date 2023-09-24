@@ -4,37 +4,38 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import OrangeBtn from "./OrangeBtn";
 import { GOOGLE_PLACES_API_KEY } from "@env";
+import { useNavigation } from "@react-navigation/native";
 
-const Map = ({ onClose = () => {}, updateLocation = () => {} }) => {
-  const [location, setLocation] = useState(null);
+const Map = ({
+  onClose = () => {},
+  updateLocation = () => {},
+  editable = false,
+  coords,
+}) => {
+  const navigation = useNavigation();
+  const [location, setLocation] = useState(coords);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
+  const onSubmit = editable
+    ? async () => {
+        setIsLoading(true);
+        const [{ city, country }] = await Location.reverseGeocodeAsync(
+          location
+        );
+        updateLocation({ ...location, city, country });
+        onClose();
+        setIsLoading(false);
       }
+    : () => navigation.goBack();
 
-      let location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setLocation(coords);
-      setIsLoading(false);
-    })();
-  }, []);
-
-  const onSubmit = async () => {
-    setIsLoading(true);
-    const [{ city, country }] = await Location.reverseGeocodeAsync(location);
-    updateLocation({ ...location, city, country });
-    onClose();
-    setIsLoading(false);
+  const onPress = (data) => {
+    if (data.nativeEvent.coordinate.latitude) {
+      setLocation({
+        latitude: data.nativeEvent.coordinate.latitude,
+        longitude: data.nativeEvent.coordinate.longitude,
+      });
+    }
   };
-
   return (
     <View style={styles.container}>
       <MapView
@@ -48,14 +49,7 @@ const Map = ({ onClose = () => {}, updateLocation = () => {} }) => {
           key: GOOGLE_PLACES_API_KEY,
           language: "en", // language of the results
         }}
-        onPress={(data) => {
-          if (data.nativeEvent.coordinate.latitude) {
-            setLocation({
-              latitude: data.nativeEvent.coordinate.latitude,
-              longitude: data.nativeEvent.coordinate.longitude,
-            });
-          }
-        }}
+        {...(editable ? { onPress } : {})}
         showsUserLocation={true}
       >
         {location && (
@@ -66,7 +60,7 @@ const Map = ({ onClose = () => {}, updateLocation = () => {} }) => {
         style={styles.button}
         onPress={onSubmit}
         disabled={isLoading}
-        title={isLoading ? "Loading..." : "Обрати"}
+        title={editable ? (isLoading ? "Loading..." : "Обрати") : "Back"}
       />
     </View>
   );

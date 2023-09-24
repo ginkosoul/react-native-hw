@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
   Alert,
 } from "react-native";
+import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { Path, Svg } from "react-native-svg";
 import { Feather } from "@expo/vector-icons";
@@ -15,8 +16,11 @@ import Map from "../components/Map";
 import OrangeBtn from "../components/OrangeBtn";
 import { uploadImage } from "../servises/storage";
 import { createPost } from "../servises/firestore";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../redux/user/selectors";
+import { useNavigation } from "@react-navigation/native";
+import { ROUTES } from "../constants/routes";
+import { addPost } from "../redux/posts/slice";
 
 const data = {
   imagePlaceholder: ["Завантажте фото", "Редагувати фото"],
@@ -48,7 +52,6 @@ const onPostCreate = async ({
   userId,
 }) => {
   const imageURL = await uploadImage(image);
-  console.log({ city, country, imageURL, latitude, longitude, title, userId });
   await createPost({
     city,
     country,
@@ -61,6 +64,8 @@ const onPostCreate = async ({
 };
 
 const CreatePostScreen = () => {
+  const navigate = useNavigation();
+  const dispatch = useDispatch();
   const { uid: userId } = useSelector(selectUser);
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState("");
@@ -77,8 +82,12 @@ const CreatePostScreen = () => {
   const onSubmit = async () => {
     setIsLoading(true);
     try {
-      await onPostCreate({ ...coords, image, userId, title });
-      Alert.alert("Published");
+      const newPost = await onPostCreate({ ...coords, image, userId, title });
+      dispatch(addPost(newPost));
+      setImage(null);
+      setTitle("");
+      setCoords(null);
+      navigate.navigate(ROUTES.home, { screen: ROUTES.posts });
     } catch (error) {
       Alert.alert("Something went wrong");
     } finally {
@@ -86,9 +95,37 @@ const CreatePostScreen = () => {
     }
   };
 
-  const location = coords ? `${coords?.city}, ${coords?.country}` : "";
+  useEffect(() => {
+    setIsLoading(true);
+    Location.requestForegroundPermissionsAsync()
+      .then(() => Location.getCurrentPositionAsync({}))
+      .then(({ coords: { latitude, longitude } }) =>
+        Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        }).then(([{ city, country }]) => ({
+          city,
+          country,
+          latitude,
+          longitude,
+        }))
+      )
+      .then(setCoords)
+      .catch((e) => {
+        console.log("something went wrong", e);
+      });
+    setCoords(coords);
+    setIsLoading(false);
+  }, []);
+
+  const location = coords ? `${coords?.city || ""}, ${coords?.country}` : "";
   return showMap ? (
-    <Map onClose={() => setShowMap(false)} updateLocation={setCoords} />
+    <Map
+      onClose={() => setShowMap(false)}
+      updateLocation={setCoords}
+      coords={{ latitude: coords.latitude, longitude: coords.longitude }}
+      editable
+    />
   ) : (
     <View style={styles.wrapper}>
       <View style={styles.imagePlaceholder}>

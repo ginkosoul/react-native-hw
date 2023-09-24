@@ -4,20 +4,27 @@ import Svg, { Path } from "react-native-svg";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { ROUTES } from "../constants/routes";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../redux/user/selectors";
+import { setSelectedPost } from "../redux/posts/slice";
 
 const PostCard = ({
   imageURL,
   title,
   likes,
-  comments,
-  commentedByMe,
+  comments = [],
   likedByMe,
   city,
   country,
   postId,
   style,
+  latitude,
+  longitude,
 }) => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+  const { uid: curUserId } = useSelector(selectUser);
+  const commentedByMe = comments.some(({ userId }) => userId === curUserId);
   return (
     <View style={[styles.wrapper, style]}>
       <Image style={styles.image} source={{ uri: imageURL }} alt={title} />
@@ -25,21 +32,27 @@ const PostCard = ({
       <View style={styles.iconsWrapper}>
         <Pressable
           style={styles.iconBtn}
-          onPress={() =>
-            navigation.navigate(ROUTES.comments, { title, postId, imageURL })
-          }
+          onPress={() => {
+            dispatch(setSelectedPost(postId));
+            navigation.navigate(ROUTES.comments);
+          }}
         >
-          <SvgComments count={comments} commentedByMe={commentedByMe} />
-          <Text style={styles.iconText}>{comments}</Text>
+          <SvgComments count={comments.length} commentedByMe={commentedByMe} />
+          <Text style={styles.iconText}>{comments.length}</Text>
         </Pressable>
         <Pressable style={styles.iconBtn}>
           <SvgLikes count={likes} likedByMe={likedByMe} />
           <Text style={styles.iconText}>{likes}</Text>
         </Pressable>
-        <View style={styles.location}>
+        <Pressable
+          style={styles.location}
+          onPress={() => {
+            navigation.navigate(ROUTES.map, { latitude, longitude });
+          }}
+        >
           <Feather name="map-pin" size={24} color="#BDBDBD" />
           <Text style={styles.locationText}>{`${city}, ${country}`}</Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

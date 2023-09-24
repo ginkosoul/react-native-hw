@@ -1,21 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Text, View, Image, StyleSheet, FlatList } from "react-native";
 import { useSelector } from "react-redux";
 import { selectUser } from "../redux/user/selectors";
 import avatar from "../assets/avatar.png";
 import PostCard from "../components/PostCard";
-import { getPosts } from "../servises/firestore";
+import { selectPosts } from "../redux/posts/selectors";
 
 const PostsScreen = () => {
-  const [posts, setPosts] = useState([]);
+  const posts = useSelector(selectPosts) || [];
   const { displayName = "User", photoURL, email } = useSelector(selectUser);
-  useEffect(() => {
-    getPosts()
-      .then((data) => {
-        setPosts(data);
-      })
-      .catch((error) => console.log("Can`t get posts", error));
-  }, []);
+
   return (
     <FlatList
       data={posts}

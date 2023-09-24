@@ -3,4 +3,8 @@ export const ROUTES = Object.freeze({
   comments: "Comments",
   login: "Login",
   regiter: "Registration",
+  profile: "Profile",
+  createPost: "CreatePost",
+  posts: "Posts",
+  map: "Map",
 });

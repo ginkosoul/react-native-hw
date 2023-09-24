@@ -11,6 +11,7 @@ import { configureStore } from "@reduxjs/toolkit";
 // } from "redux-persist";
 
 import { userReduser } from "./user/slice";
+import { postsReducer } from "./posts/slice";
 
 // const persistConfig = {
 //   key: "root",
@@ -20,7 +21,7 @@ import { userReduser } from "./user/slice";
 // const user = persistReducer(persistConfig, userReduser);
 
 export const store = configureStore({
-  reducer: { user: userReduser },
+  reducer: { user: userReduser, posts: postsReducer },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({
   //     serializableCheck: {

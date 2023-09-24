@@ -1,8 +1,12 @@
 import {
   addDoc,
   collection,
+  doc,
+  FieldPath,
+  getDoc,
   getDocs,
   query,
+  setDoc,
   Timestamp,
   where,
 } from "firebase/firestore";
@@ -10,19 +14,27 @@ import { db, auth } from "../config";
 
 const postsRef = collection(db, "posts");
 const commentsRef = collection(db, "comments");
+const usersRef = collection(db, "users");
 
-export const writeDataToFirestore = async () => {
-  try {
-    const docRef = await addDoc(collection(db, "users"), {
-      first: "Ada",
-      last: "Lovelace",
-      born: 1815,
-    });
-    console.log("Document written with ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error adding document: ", e);
-    throw e;
-  }
+export const setUser = async ({ uid, email, displayName, photoURL }) => {
+  const userRef = doc(db, "users", uid);
+  await setDoc(userRef, {
+    email,
+    displayName,
+    photoURL,
+  });
+};
+
+export const getUsers = async () => {
+  const usersList = {};
+  // const q = query(usersRef, where(usersRef.id, "in", users));
+  const snapshot = await getDocs(usersRef);
+  snapshot.forEach((doc) => {
+    usersList[doc.id] = {
+      ...doc.data(),
+    };
+  });
+  return usersList;
 };
 
 export const createPost = async ({
@@ -46,7 +58,13 @@ export const createPost = async ({
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-    return docRef.id;
+    const snapshot = await getDoc(docRef);
+    return {
+      postId: snapshot.id,
+      ...snapshot.data(),
+      createdAt: snapshot.data().createdAt.toDate().valueOf(),
+      updatedAt: snapshot.data().updatedAt.toDate().valueOf(),
+    };
   } catch (e) {
     console.error("Error adding document: ", e);
   }
@@ -60,33 +78,57 @@ export const createComment = async ({ userId, postId, message }) => {
       message,
       createdAt: Timestamp.now(),
     });
-    return docRef.id;
+    const snapshot = await getDoc(docRef);
+    const comment = {
+      ...snapshot.data(),
+      id: snapshot.id,
+      createdAt: snapshot.data().createdAt.toDate().valueOf(),
+    };
+    return comment;
   } catch (e) {
     console.error("Error adding document: ", e);
   }
 };
 
-export const getPosts = async (body) => {
-  const userId = body?.userId;
+export const getPosts = async (data) => {
+  const userId = data?.userId;
   const posts = [];
+  const postsId = [];
   const q = userId ? query(postsRef, where("userId", "==", userId)) : postsRef;
   const snapshot = await getDocs(q);
   snapshot.forEach((doc) => {
-    posts.push({ postId: doc.id, ...doc.data() });
+    postsId.push(doc.id);
+    const data = doc.data();
+    posts.push({
+      postId: doc.id,
+      ...data,
+      createdAt: data.createdAt.toDate().valueOf(),
+      updatedAt: data.updatedAt.toDate().valueOf(),
+    });
   });
-  return posts;
+  posts.sort((a, b) => b.createdAt - a.createdAt);
+  if (posts.length === 0) return posts;
+  const comments = await getComments({ postsId });
+  return posts.map((post) => ({
+    ...post,
+    comments: comments
+      .filter((comment) => comment.postId === post.postId)
+      .sort((a, b) => a.createdAt - b.createdAt),
+  }));
 };
 
-export const getComments = async ({ postId }) => {
+export const getComments = async ({ postsId }) => {
   const comments = [];
-  const q = query(commentsRef, where("postId", "==", postId));
+  if (!postsId.length) return [];
+  const q = query(commentsRef, where("postId", "in", postsId));
   const snapshot = await getDocs(q);
   snapshot.forEach((doc) => {
     comments.push({
       id: doc.id,
       ...doc.data(),
-      createdAt: doc.data().createdAt.toDate(),
+      createdAt: doc.data().createdAt.toDate().valueOf(),
     });
   });
   return comments;
 };
+new Date().valueOf();

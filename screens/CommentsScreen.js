@@ -12,73 +12,46 @@ import {
   Keyboard,
 } from "react-native";
 import { Circle, Path, Svg } from "react-native-svg";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../redux/user/selectors";
-import { createComment, getComments } from "../servises/firestore";
-
-// const comments = [
-//   {
-//     photoURL:
-//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-//     message:
-//       "Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!",
-//     createdAt: "09 червня, 2020 | 08:40",
-//     userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
-//   },
-//   {
-//     photoURL:
-//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-//     message:
-//       "A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.",
-//     createdAt: "09 червня, 2020 | 09:14",
-//     userId: "HRvTm9NOFGPN0svv6U7RpkRt9vv2",
-//   },
-//   {
-//     photoURL:
-//       "https://firebasestorage.googleapis.com/v0/b/goit-mobile-app.appspot.com/o/images%2FRyLETnY6atMqHd5I6sZ7b8NVcBD2_c2b90609-a3ef-48d7-9553-d1dbfa79da96.jpeg?alt=media&token=9f27f557-9cde-4789-977b-f011935faaff",
-//     message: "Thank you! That was very helpful!",
-//     createdAt: "09 червня, 2020 | 09:20",
-//     userId: "RyLETnY6atMqHd5I6sZ7b8NVcBD2",
-//   },
-// ];
+import { createComment, getComments, getUsers } from "../servises/firestore";
+import avatar from "../assets/avatar.png";
+import { selectUsers, selectedPost } from "../redux/posts/selectors";
+import { addComment } from "../redux/posts/slice";
+import { formatDate } from "../utils/formatDate";
 
 const textData = {
   input: { placeholder: "Коментувати...", inputMode: "text" },
 };
 
-const CommentsScreen = ({ route, navigation }) => {
-  const [message, setMessage] = useState("");
-  const [comments, setComments] = useState([]);
-
+const CommentsScreen = () => {
+  const dispatch = useDispatch();
+  const selectedPostData = useSelector(selectedPost);
   const { uid: currentUserId } = useSelector(selectUser);
-  const { title, postId, imageURL } = route.params;
-  console.log(route);
-  console.log("comments", comments);
+  const users = useSelector(selectUsers);
+  const { title, postId, imageURL, comments } = selectedPostData;
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    getComments({ postId })
-      .then((r) => {
-        console.log(r);
-        setComments(r);
-      })
-      .catch((error) => {
-        console.log("Something went wrong getting comments");
-      });
-  }, []);
-
-  const data = comments.map((comment) => ({ ...comment, currentUserId }));
+  const data = comments.map((comment) => ({
+    ...comment,
+    photoURL: users[comment.userId]?.photoURL || "",
+    displayName: users[comment.userId]?.displayName || "",
+    currentUserId,
+  }));
 
   const onSubmit = () => {
+    setIsLoading(true);
     createComment({ message, postId, userId: currentUserId })
-      .then((id) =>
-        setComments((prev) => [
-          ...prev,
-          { message, postId, userId: currentUserId, id, createdAt: new Date() },
-        ])
-      )
+      .then((comment) => {
+        dispatch(addComment(comment));
+        Keyboard.dismiss();
+        setMessage("");
+      })
       .catch((error) => {
-        console.log("Something went wrong");
-      });
+        console.log("Something went wrong", error);
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -100,7 +73,7 @@ const CommentsScreen = ({ route, navigation }) => {
           <Pressable
             style={styles.sendBtn}
             onPress={onSubmit}
-            disabled={!message}
+            disabled={!message || isLoading}
           >
             <SvgSend />
           </Pressable>
@@ -144,7 +117,7 @@ const styles = StyleSheet.create({
   },
   message: {
     color: "#212121",
-    fontSize: 13,
+    fontSize: 16,
     lineHeight: 18,
     maxWidth: "100%",
     flex: 1,
@@ -200,7 +173,8 @@ function CommentCard({
     >
       <Image
         style={styles.commentAvatar}
-        source={{ uri: photoURL }}
+        source={photoURL ? { uri: photoURL } : null}
+        defaultSource={avatar}
         alt={displayName}
       />
       <View
@@ -216,7 +190,7 @@ function CommentCard({
             isOwn ? { textAlign: "left" } : { textAlign: "right" },
           ]}
         >
-          {createdAt.toISOString()}
+          {formatDate(createdAt)}
         </Text>
       </View>
     </View>
